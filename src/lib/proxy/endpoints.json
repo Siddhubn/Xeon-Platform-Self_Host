@@ -1,0 +1,11 @@
+{
+  "ep-main": {
+    "host": "127.0.0.1",
+    "port": 55432,
+    "project_id": "self-hosted",
+    "branch_id": "main",
+    "compute_id": "ep-main",
+    "tenant_id": "0908a23e5151e6d9c6cf43fbbb819aa5",
+    "timeline_id": "5ead2b92252b3fab15b7e93bda5a5d50"
+  }
+}

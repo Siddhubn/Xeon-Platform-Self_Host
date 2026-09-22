@@ -1,8 +1,129 @@
 @import "tailwindcss";
 
+/* ── Neon Design Tokens (defaults — overridden by ThemeProvider) ── */
 :root {
+  /* Base theme (defaults to dark) */
+  --background: #0b0f1a;
+  --foreground: #f3f4f6;
+
+  /* Accent (set dynamically by ThemeProvider) */
+  --accent: #3b82f6;
+  --accent-hover: #2563eb;
+  --accent-active: #1d4ed8;
+  --accent-foreground: #ffffff;
+  --accent-soft: rgba(59, 130, 246, 0.15);
+  --accent-subtle: rgba(59, 130, 246, 0.08);
+  --focus-ring: rgba(59, 130, 246, 0.4);
+  --selection: rgba(59, 130, 246, 0.2);
+
+  /* Neon green brand → mapped to accent */
+  --neon-green: var(--accent);
+  --neon-green-hover: var(--accent-hover);
+  --neon-green-bg: var(--accent-soft);
+  --neon-green-border: var(--accent-subtle);
+
+  /* Sidebar */
+  --sidebar-bg: #0b0f1a;
+  --sidebar-width: 240px;
+  --sidebar-text: #6b7280;
+  --sidebar-text-hover: #d1d5db;
+  --sidebar-hover: rgba(255, 255, 255, 0.06);
+  --sidebar-border: rgba(255, 255, 255, 0.08);
+
+  /* Surfaces */
+  --bg-surface: #111827;
+  --bg-surface-secondary: #0b0f1a;
+  --bg-inset: #1f2937;
+  --bg-hover: rgba(255, 255, 255, 0.06);
+  --bg-hover-strong: rgba(255, 255, 255, 0.1);
+
+  /* Text */
+  --text-primary: #f9fafb;
+  --text-secondary: #d1d5db;
+  --text-tertiary: #9ca3af;
+  --text-link: var(--accent);
+  --text-inverse: #111827;
+
+  /* Borders */
+  --border-default: #374151;
+  --border-hover: #4b5563;
+  --border-strong: #6b7280;
+
+  /* Status */
+  --status-active: #10b981;
+  --status-active-bg: rgba(16, 185, 129, 0.15);
+  --status-idle: #f59e0b;
+  --status-idle-bg: rgba(245, 158, 11, 0.15);
+  --status-error: #ef4444;
+  --status-error-bg: rgba(239, 68, 68, 0.15);
+  --status-info: var(--accent);
+  --status-info-bg: var(--accent-soft);
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.4);
+
+  /* Scrollbar */
+  --scrollbar-thumb: #4b5563;
+
+  /* Radius */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
+
+  /* Motion tokens */
+  --motion-fast: 100ms;
+  --motion-normal: 180ms;
+  --motion-slow: 250ms;
+  --ease-standard: cubic-bezier(0.25, 0.1, 0.25, 1);
+  --ease-enter: cubic-bezier(0, 0, 0.2, 1);
+  --ease-exit: cubic-bezier(0.4, 0, 1, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Light theme overrides — applied when data-theme="light" on <html> */
+:root[data-theme="light"] {
   --background: #ffffff;
   --foreground: #171717;
+
+  --sidebar-bg: #f8f9fa;
+  --sidebar-text: #6b7280;
+  --sidebar-text-hover: #374151;
+  --sidebar-hover: rgba(0, 0, 0, 0.04);
+  --sidebar-border: rgba(0, 0, 0, 0.08);
+
+  --bg-surface: #ffffff;
+  --bg-surface-secondary: #f9fafb;
+  --bg-inset: #f3f4f6;
+  --bg-hover: rgba(0, 0, 0, 0.04);
+  --bg-hover-strong: rgba(0, 0, 0, 0.06);
+
+  --text-primary: #111827;
+  --text-secondary: #4b5563;
+  --text-tertiary: #9ca3af;
+  --text-link: var(--accent);
+  --text-inverse: #ffffff;
+
+  --border-default: #e5e7eb;
+  --border-hover: #d1d5db;
+  --border-strong: #9ca3af;
+
+  --status-active: #10b981;
+  --status-active-bg: rgba(16, 185, 129, 0.1);
+  --status-idle: #f59e0b;
+  --status-idle-bg: rgba(245, 158, 11, 0.1);
+  --status-error: #ef4444;
+  --status-error-bg: rgba(239, 68, 68, 0.08);
+  --status-info: var(--accent);
+  --status-info-bg: var(--accent-soft);
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.08);
+
+  --scrollbar-thumb: #d1d5db;
 }
 
 @theme inline {
@@ -12,15 +133,764 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* ── Base ── */
+body {
+  background: var(--bg-surface-secondary);
+  color: var(--text-primary);
+  font-family: Arial, Helvetica, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) transparent;
+}
+
+*::-webkit-scrollbar { width: 6px; height: 6px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 3px; }
+*::-webkit-scrollbar-thumb:hover { opacity: 0.8; }
+
+/* ── Animations ── */
+/* ── Keyframes ── */
+@keyframes page-enter {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes card-enter {
+  from { opacity: 0; transform: translateY(3px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes dropdown-enter {
+  from { opacity: 0; transform: translateY(-4px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes modal-enter {
+  from { opacity: 0; transform: scale(0.97); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes slide-in-right {
+  from { opacity: 0; transform: translateX(8px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slide-in-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-in-down {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes toast-enter {
+  from { opacity: 0; transform: translateX(100%) scale(0.95); }
+  to { opacity: 1; transform: translateX(0) scale(1); }
+}
+
+@keyframes toast-exit {
+  from { opacity: 1; transform: translateX(0) scale(1); }
+  to { opacity: 0; transform: translateX(100%) scale(0.95); }
+}
+
+@keyframes row-highlight {
+  0% { background: var(--accent-soft); }
+  100% { background: transparent; }
+}
+
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes status-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes skeleton-pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.8; }
+}
+
+/* ── Animation Utilities ── */
+.animate-page-enter { animation: page-enter var(--motion-normal) var(--ease-enter); }
+.animate-card-enter { animation: card-enter var(--motion-normal) var(--ease-enter); }
+.animate-dropdown-enter { animation: dropdown-enter var(--motion-fast) var(--ease-enter); }
+.animate-modal-enter { animation: modal-enter var(--motion-normal) var(--ease-enter); }
+.animate-fade-in { animation: fade-in var(--motion-fast) var(--ease-standard); }
+.animate-fade-out { animation: fade-out var(--motion-fast) var(--ease-exit); }
+.animate-slide-in-right { animation: slide-in-right var(--motion-normal) var(--ease-enter); }
+.animate-slide-in-up { animation: slide-in-up var(--motion-normal) var(--ease-enter); }
+.animate-slide-in-down { animation: slide-in-down var(--motion-fast) var(--ease-enter); }
+.animate-toast-enter { animation: toast-enter var(--motion-normal) var(--ease-spring); }
+.animate-toast-exit { animation: toast-exit var(--motion-fast) var(--ease-exit); }
+.animate-row-highlight { animation: row-highlight 1.5s var(--ease-standard) forwards; }
+.animate-spin-slow { animation: spin-slow 0.8s linear infinite; }
+.animate-status-pulse { animation: status-pulse 2s ease-in-out infinite; }
+.animate-skeleton-pulse { animation: skeleton-pulse 1.5s ease-in-out infinite; }
+
+.stagger-children > *:nth-child(1) { animation-delay: 0ms; }
+.stagger-children > *:nth-child(2) { animation-delay: 30ms; }
+.stagger-children > *:nth-child(3) { animation-delay: 60ms; }
+.stagger-children > *:nth-child(4) { animation-delay: 90ms; }
+.stagger-children > *:nth-child(5) { animation-delay: 120ms; }
+.stagger-children > *:nth-child(6) { animation-delay: 150ms; }
+
+/* ── Reduced Motion ── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* ── Theme Transition ── */
+html.theme-transitioning,
+html.theme-transitioning *,
+html.theme-transitioning *::before,
+html.theme-transitioning *::after {
+  transition: background-color var(--motion-normal) var(--ease-standard),
+              color var(--motion-normal) var(--ease-standard),
+              border-color var(--motion-normal) var(--ease-standard),
+              box-shadow var(--motion-normal) var(--ease-standard) !important;
+}
+
+/* ── Neon Buttons ── */
+.neon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: var(--radius-sm);
+  padding: 8px 14px;
+  transition: all var(--motion-fast) var(--ease-standard);
+  white-space: nowrap;
+  cursor: pointer;
+  border: 1px solid transparent;
+  line-height: 1;
+}
+
+.neon-btn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.neon-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.neon-btn-primary {
+  background: var(--accent);
+  color: var(--accent-foreground);
+  font-weight: 600;
+}
+.neon-btn-primary:hover:not(:disabled) {
+  background: var(--accent-hover);
+  box-shadow: 0 0 12px var(--focus-ring);
+}
+
+.neon-btn-secondary {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  border-color: var(--border-default);
+}
+.neon-btn-secondary:hover:not(:disabled) {
+  border-color: var(--border-hover);
+  background: var(--bg-hover);
+}
+
+.neon-btn-ghost {
+  background: transparent;
+  color: var(--text-secondary);
+}
+.neon-btn-ghost:hover:not(:disabled) {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.neon-btn-danger {
+  background: var(--status-error);
+  color: #fff;
+  font-weight: 600;
+}
+.neon-btn-danger:hover:not(:disabled) {
+  background: #dc2626;
+}
+
+.neon-btn-sm {
+  font-size: 12px;
+  padding: 5px 10px;
+}
+
+/* ── Neon Inputs ── */
+.neon-input {
+  display: block;
+  width: 100%;
+  height: 38px;
+  padding: 0 12px;
+  font-size: 13px;
+  color: var(--text-primary);
+  background: var(--bg-inset);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  outline: none;
+  transition: border-color var(--motion-fast) var(--ease-standard),
+              box-shadow var(--motion-fast) var(--ease-standard),
+              background-color var(--motion-fast) var(--ease-standard);
+}
+
+.neon-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--focus-ring);
+}
+
+.neon-input::placeholder {
+  color: var(--text-tertiary);
+}
+
+.neon-input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: var(--bg-hover);
+}
+
+textarea.neon-input {
+  height: auto;
+  min-height: 80px;
+  padding: 8px 12px;
+  resize: vertical;
+}
+
+select.neon-input {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 30px;
+}
+
+select.neon-input option {
+  padding: 8px 12px;
+}
+
+/* Light mode select options */
+[data-theme="light"] select.neon-input option,
+:root:not([data-theme="dark"]) select.neon-input option {
+  background: #ffffff;
+  color: #111827;
+}
+
+[data-theme="light"] select.neon-input option:hover,
+:root:not([data-theme="dark"]) select.neon-input option:hover {
+  background: #f3f4f6;
+}
+
+[data-theme="light"] select.neon-input option:checked,
+:root:not([data-theme="dark"]) select.neon-input option:checked {
+  background: rgba(59, 130, 246, 0.1);
+}
+
+/* Dark mode select options */
+[data-theme="dark"] select.neon-input option {
+  background: #111827;
+  color: #f9fafb;
+}
+
+[data-theme="dark"] select.neon-input option:hover {
+  background: #1f2937;
+}
+
+[data-theme="dark"] select.neon-input option:checked {
+  background: rgba(59, 130, 246, 0.2);
+}
+
+/* All native selects — ensure dark mode option visibility */
+select option {
+  color: inherit;
+}
+
+[data-theme="dark"] select option {
+  background-color: #111827 !important;
+  color: #f9fafb !important;
+}
+
+[data-theme="dark"] select option:hover {
+  background-color: #1f2937 !important;
+}
+
+[data-theme="dark"] select option:checked,
+[data-theme="dark"] select option:selected {
+  background-color: rgba(59, 130, 246, 0.25) !important;
+  color: #f9fafb !important;
+}
+
+/* System mode: follow OS preference */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) select.neon-input option {
+    background: #111827;
+    color: #f9fafb;
+  }
+  :root:not([data-theme="light"]) select.neon-input option:hover {
+    background: #1f2937;
+  }
+  :root:not([data-theme="light"]) select.neon-input option:checked {
+    background: rgba(59, 130, 246, 0.2);
+  }
+}
+
+/* ── Neon Card ── */
+.neon-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  animation: card-enter 0.25s ease-out;
+}
+
+/* ── Neon Table ── */
+.neon-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.neon-table th {
+  padding: 10px 16px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+  text-align: left;
+  border-bottom: 1px solid var(--border-default);
+  background: var(--bg-inset);
+}
+
+.neon-table td {
+  padding: 12px 16px;
+  font-size: 13px;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-default);
+}
+
+.neon-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.neon-table tbody tr:hover {
+  background: var(--bg-hover);
+}
+
+/* ── Neon Badge ── */
+.neon-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+.neon-badge-green {
+  background: var(--status-active-bg);
+  color: var(--status-active);
+}
+
+.neon-badge-red {
+  background: var(--status-error-bg);
+  color: var(--status-error);
+}
+
+.neon-badge-yellow {
+  background: var(--status-idle-bg);
+  color: var(--status-idle);
+}
+
+.neon-badge-blue {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.neon-badge-gray {
+  background: var(--bg-hover);
+  color: var(--text-secondary);
+}
+
+/* ── Status Dot ── */
+.neon-status-dot {
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.neon-status-dot-active {
+  background: var(--status-active);
+  box-shadow: 0 0 4px rgba(16, 185, 129, 0.5);
+}
+
+.neon-status-dot-idle {
+  background: var(--status-idle);
+}
+
+.neon-status-dot-error {
+  background: var(--status-error);
+}
+
+/* ── Modal ── */
+/* ── Backdrop — translucent overlay for all modals ── */
+.backdrop-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.3);
+  animation: fade-in var(--motion-fast) var(--ease-standard);
+}
+
+.neon-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  animation: fade-in var(--motion-fast) var(--ease-standard);
+}
+
+.neon-modal {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  width: 90%;
+  max-width: 480px;
+  max-height: 85vh;
+  overflow-y: auto;
+  animation: dropdown-enter 0.2s ease-out;
+}
+
+/* ── Tabs ── */
+.neon-tabs {
+  display: flex;
+  gap: 2px;
+  border-bottom: 1px solid var(--border-default);
+  padding-bottom: 0;
+}
+
+.neon-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  cursor: pointer;
+  transition: all var(--motion-fast) var(--ease-standard);
+}
+
+.neon-tab:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+}
+
+.neon-tab-active {
+  color: var(--text-primary);
+  border-bottom-color: var(--accent);
+  font-weight: 600;
+}
+
+/* ── Skeleton ── */
+.neon-skeleton {
+  background: var(--bg-inset);
+  border-radius: var(--radius-sm);
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+
+.skeleton-block {
+  background: linear-gradient(
+    110deg,
+    var(--bg-inset) 0%,
+    var(--bg-inset) 40%,
+    var(--bg-hover) 50%,
+    var(--bg-inset) 60%,
+    var(--bg-inset) 100%
+  );
+  background-size: 250% 100%;
+  animation: skeleton-shimmer 2s ease-in-out infinite;
+  border-radius: var(--radius-sm);
+}
+
+@keyframes skeleton-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Nested skeleton elements animate with staggered delays */
+.skeleton-block > .skeleton-block,
+.skeleton-block > div > .skeleton-block {
+  animation-delay: 0.15s;
+}
+
+/* Direct children of a container get a subtle stagger */
+[class*="stagger"] > .skeleton-block:nth-child(2) { animation-delay: 0.08s; }
+[class*="stagger"] > .skeleton-block:nth-child(3) { animation-delay: 0.16s; }
+[class*="stagger"] > .skeleton-block:nth-child(4) { animation-delay: 0.24s; }
+[class*="stagger"] > .skeleton-block:nth-child(5) { animation-delay: 0.32s; }
+
+/* ── Connection String Box ── */
+.neon-connection-string {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--bg-inset);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 12px;
+  color: var(--text-primary);
+  word-break: break-all;
+}
+
+/* ── Tooltip ── */
+[data-tooltip] {
+  position: relative;
+}
+
+[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 4px 8px;
+  font-size: 11px;
+  white-space: nowrap;
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--motion-fast) var(--ease-standard);
+  z-index: 50;
+  box-shadow: var(--shadow-md);
+}
+
+[data-tooltip]:hover::after {
+  opacity: 1;
+}
+
+/* ── Code ── */
+code, pre {
+  font-family: var(--font-geist-mono), "SF Mono", "Fira Code", monospace;
+}
+
+/* ── Selection ── */
+::selection {
+  background: var(--selection);
+}
+
+/* ── Search Input ── */
+.search-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-input-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  color: var(--text-tertiary);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.search-input {
+  width: 100%;
+  height: 40px;
+  padding: 0 12px 0 36px;
+  font-size: 13px;
+  color: var(--text-primary);
+  background: var(--bg-inset);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  outline: none;
+  transition: border-color var(--motion-fast) var(--ease-standard),
+              box-shadow var(--motion-fast) var(--ease-standard),
+              background-color var(--motion-fast) var(--ease-standard);
+}
+
+.search-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--focus-ring);
+}
+
+.search-input::placeholder {
+  color: var(--text-tertiary);
+}
+
+/* ── Topbar ── */
+.topbar {
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--border-default);
+  background: var(--bg-surface);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  backdrop-filter: blur(8px);
+}
+
+/* ── Search Button ── */
+.search-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border-default);
+  color: var(--text-tertiary);
+  font-size: 12px;
+  background: transparent;
+  cursor: pointer;
+  transition: all var(--motion-fast) var(--ease-standard);
+  width: 180px;
+  text-align: left;
+}
+
+.search-button:hover {
+  border-color: var(--border-hover);
+  color: var(--text-secondary);
+  background: var(--bg-hover);
+}
+
+/* ── Dropdown Menu ── */
+.dropdown-menu {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  margin-top: 6px;
+  width: 240px;
+  padding: 4px 0;
+  border-radius: 12px;
+  border: 1px solid var(--border-hover);
+  background: var(--bg-surface);
+  box-shadow: var(--shadow-lg), 0 0 0 1px rgba(255,255,255,0.04);
+  animation: dropdown-enter 0.15s ease-out;
+  z-index: 50;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+[data-theme="dark"] .dropdown-menu,
+.dropdown-menu[data-theme="dark"] {
+  background: #1e293b;
+  border-color: rgba(255, 255, 255, 0.18);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255,255,255,0.08);
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 8px 12px;
+  font-size: 13px;
+  color: var(--text-primary);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all var(--motion-fast) var(--ease-standard);
+  text-align: left;
+}
+
+.dropdown-item:hover {
+  background: var(--bg-hover-strong);
+}
+
+[data-theme="dark"] .dropdown-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* ── Interactive Card Hover ── */
+.neon-card-hover {
+  transition: border-color var(--motion-fast) var(--ease-standard),
+              box-shadow var(--motion-fast) var(--ease-standard),
+              transform var(--motion-fast) var(--ease-standard);
+}
+
+.neon-card-hover:hover {
+  border-color: var(--border-hover);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+/* ── Table Row Transitions ── */
+.neon-table tbody tr {
+  transition: background-color var(--motion-fast) var(--ease-standard);
+}
+
+.neon-table tbody tr:hover {
+  background: var(--bg-hover);
+}
+
+/* ── List Item Enter/Exit ── */
+.list-item-enter {
+  animation: slide-in-up var(--motion-normal) var(--ease-enter);
+}
+
+.list-item-exit {
+  animation: fade-out var(--motion-fast) var(--ease-exit) forwards;
+}
+
+/* ── Notification / Toast ── */
+.notification-enter {
+  animation: toast-enter var(--motion-normal) var(--ease-spring);
+}
+
+.notification-exit {
+  animation: toast-exit var(--motion-fast) var(--ease-exit) forwards;
+}
+
+/* ── Success Banner ── */
+.success-banner {
+  animation: slide-in-down var(--motion-normal) var(--ease-enter);
+}
+
+/* ── Error Banner ── */
+.error-banner {
+  animation: slide-in-down var(--motion-normal) var(--ease-enter);
 }

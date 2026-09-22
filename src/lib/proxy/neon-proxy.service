@@ -1,0 +1,48 @@
+[Unit]
+Description=Neon PostgreSQL Proxy (Public Access)
+Documentation=https://neon.tech/docs
+After=network.target neon-cplane-adapter.service
+Wants=neon-cplane-adapter.service
+
+[Service]
+Type=simple
+User=skxll_thief
+Group=skxll_thief
+WorkingDirectory=/opt/neon/proxy-config
+
+EnvironmentFile=/opt/neon/proxy-config/proxy.env
+
+ExecStartPre=/opt/neon/proxy-config/bin/verify-proxy-prereqs.sh
+ExecStart=/opt/neon/target/release/proxy \
+    --proxy 0.0.0.0:5432 \
+    --auth-backend control-plane \
+    --auth-endpoint http://127.0.0.1:5433/ \
+    --control-plane-token "" \
+    --http 127.0.0.1:7001 \
+    --mgmt 127.0.0.1:7000 \
+    --tls-key /opt/neon/proxy-config/tls/server.key \
+    --tls-cert /opt/neon/proxy-config/tls/server.crt \
+    --handshake-timeout 15s \
+    --scram-protocol-timeout 15s \
+    --scram-thread-pool-size 4 \
+    --connect-to-compute-retry "num_retries=3,base_retry_wait_duration=200ms,retry_wait_exponent_base=2" \
+    --wake-compute-retry "num_retries=2,base_retry_wait_duration=500ms,retry_wait_exponent_base=2"
+
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=neon-proxy
+
+# Allow binding to privileged ports
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+
+# Security hardening
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/neon/proxy-config/logs
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

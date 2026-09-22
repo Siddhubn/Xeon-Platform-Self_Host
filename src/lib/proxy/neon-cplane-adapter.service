@@ -1,0 +1,32 @@
+[Unit]
+Description=Neon Proxy Control Plane Adapter
+Documentation=https://neon.tech/docs
+After=network.target postgresql.service
+Wants=postgresql.service
+
+[Service]
+Type=simple
+User=skxll_thief
+Group=skxll_thief
+WorkingDirectory=/opt/neon/proxy-config
+
+EnvironmentFile=/opt/neon/proxy-config/proxy.env
+
+ExecStart=/usr/bin/python3 /opt/neon/proxy-config/bin/control-plane-adapter.py
+
+Restart=always
+RestartSec=3
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=neon-cplane-adapter
+
+# Security hardening
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/neon/proxy-config/logs
+ReadWritePaths=/opt/neon/proxy-config/endpoints.json
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

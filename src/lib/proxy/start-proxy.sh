@@ -12,7 +12,7 @@ source "${SCRIPT_DIR}/../proxy.env" 2>/dev/null || source "/opt/neon/proxy-confi
 
 # Defaults
 NEON_PROXY_BINARY="${NEON_PROXY_BINARY:-/opt/neon/target/release/proxy}"
-NEON_PROXY_PORT="${NEON_PROXY_PORT:-5432}"
+NEON_PROXY_PORT="${NEON_PROXY_PORT:-65432}"
 NEON_PROXY_BIND="${NEON_PROXY_BIND:-0.0.0.0}"
 NEON_CPLANE_HOST="${NEON_CPLANE_HOST:-127.0.0.1}"
 NEON_CPLANE_PORT="${NEON_CPLANE_PORT:-5433}"

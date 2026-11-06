@@ -47,7 +47,7 @@ WorkingDirectory=/opt/neon/proxy-config
 EnvironmentFile=/opt/neon/proxy-config/proxy.env
 ExecStartPre=/bin/bash -c 'sleep 2'
 ExecStart=/opt/neon/target/release/proxy \
-    --proxy 0.0.0.0:5432 \
+    --proxy 0.0.0.0:65432 \
     --auth-backend control-plane \
     --auth-endpoint http://127.0.0.1:5433/ \
     --control-plane-token "" \

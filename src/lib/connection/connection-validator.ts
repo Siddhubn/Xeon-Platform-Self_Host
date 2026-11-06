@@ -16,6 +16,11 @@ export async function testConnection(params: {
   user: string;
   password: string;
   sslMode: SslMode;
+  /** Neon proxy routing option, e.g. `endpoint=ep-main` (required on the proxy). */
+  options?: string;
+  /** `direct` starts TLS immediately (needed through the Tailscale Funnel edge,
+   *  which drops connections that begin with the classic SSLRequest preface). */
+  sslnegotiation?: "postgres" | "direct";
   timeoutMs?: number;
 }): Promise<ConnectionTestResult> {
   const startTime = Date.now();
@@ -30,6 +35,8 @@ export async function testConnection(params: {
     connectionTimeoutMillis: timeout,
     query_timeout: timeout,
     ssl: params.sslMode !== "disable" ? { rejectUnauthorized: false } : false,
+    ...(params.options ? { options: params.options } : {}),
+    ...(params.sslnegotiation ? { sslnegotiation: params.sslnegotiation } : {}),
   });
 
   try {

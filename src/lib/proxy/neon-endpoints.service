@@ -1,0 +1,17 @@
+[Unit]
+Description=Neon compute endpoints auto-start (ep-main, ep-0240dab0, ep-99ab67a9)
+After=neon.service neon-cplane-adapter.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+# MUST be skxll_thief: PostgreSQL refuses to run as root, and all endpoint
+# state under /srv/neon/.neon is owned by this user.
+User=skxll_thief
+Environment=PATH=/usr/local/bin:/usr/bin:/bin
+ExecStart=/opt/neon/proxy-config/bin/start-endpoints.sh
+TimeoutStartSec=900
+
+[Install]
+WantedBy=multi-user.target

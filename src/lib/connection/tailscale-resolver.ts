@@ -41,7 +41,9 @@ export function resolveTailscaleStatus(): TailscaleStatus {
       ipv4: envIp,
       ipv6: "",
       dnsName: envDns,
-      magicDnsName: envHost || envDns,
+      // Prefer the DNS name for display when configured — NEON_TAILSCALE_HOST
+      // may be a bare IP.
+      magicDnsName: envDns || envHost,
       tailscaleIp: envIp,
     };
   }

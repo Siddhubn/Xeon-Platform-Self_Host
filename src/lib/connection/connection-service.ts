@@ -22,6 +22,43 @@ export class ConnectionService {
   private db = getDb();
 
   /**
+   * Find the compute for a branch. Tolerates the branch being referenced by
+   * its internal timeline id (what the projects API advertises as
+   * `defaultBranchId`) instead of the branch row id used by `computes`.
+   */
+  private resolveCompute(projectId: string, branchId: string) {
+    const byBranch = (bId: string) =>
+      this.db
+        .select()
+        .from(schema.computes)
+        .where(
+          and(
+            eq(schema.computes.projectId, projectId),
+            eq(schema.computes.branchId, bId),
+            isNull(schema.computes.deletedAt)
+          )
+        )
+        .get();
+
+    const direct = byBranch(branchId);
+    if (direct) return direct;
+
+    // Not found — the caller may have passed the branch's internal timeline id.
+    const branch = this.db
+      .select()
+      .from(schema.branches)
+      .where(
+        and(
+          eq(schema.branches.projectId, projectId),
+          eq(schema.branches.internalTimelineId, branchId)
+        )
+      )
+      .get();
+
+    return branch ? byBranch(branch.id) : undefined;
+  }
+
+  /**
    * Get full connection details for a project/branch combination.
    */
   async getConnectionDetails(params: {
@@ -45,17 +82,7 @@ export class ConnectionService {
     } = params;
 
     // Resolve compute for this branch
-    const compute = this.db
-      .select()
-      .from(schema.computes)
-      .where(
-        and(
-          eq(schema.computes.projectId, projectId),
-          eq(schema.computes.branchId, branchId),
-          isNull(schema.computes.deletedAt)
-        )
-      )
-      .get();
+    const compute = this.resolveCompute(projectId, branchId);
 
     const computeHost = compute?.host || process.env.POSTGRES_HOST || "localhost";
     const computePort = compute?.port || parseInt(process.env.POSTGRES_PORT || "5432");
@@ -76,8 +103,8 @@ export class ConnectionService {
     const databaseName = params.databaseName || compute?.database || "neondb";
     const roleName = params.roleName || compute?.role || process.env.POSTGRES_USER || "cloud_admin";
 
-    // Resolve SSL
-    const resolvedSsl = resolveSslMode(networkMode, sslMode);
+    // Resolve SSL (Auto mode needs the resolved host source to decide)
+    const resolvedSsl = resolveSslMode(networkMode, sslMode, resolvedHost.source);
 
     // Resolve pooler (if configured)
     const poolerHost = process.env.NEON_POOLER_HOST || "";
@@ -131,17 +158,7 @@ export class ConnectionService {
     } = params;
 
     // Resolve compute
-    const compute = this.db
-      .select()
-      .from(schema.computes)
-      .where(
-        and(
-          eq(schema.computes.projectId, projectId),
-          eq(schema.computes.branchId, branchId),
-          isNull(schema.computes.deletedAt)
-        )
-      )
-      .get();
+    const compute = this.resolveCompute(projectId, branchId);
 
     const computeHost = compute?.host || process.env.POSTGRES_HOST || "localhost";
     const computePort = compute?.port || parseInt(process.env.POSTGRES_PORT || "5432");
@@ -160,10 +177,16 @@ export class ConnectionService {
 
     const databaseName = params.databaseName || compute?.database || "neondb";
     const roleName = params.roleName || compute?.role || process.env.POSTGRES_USER || "cloud_admin";
-    const resolvedSsl = resolveSslMode(networkMode, sslMode);
+    const resolvedSsl = resolveSslMode(networkMode, sslMode, resolvedHost.source);
 
     // For "local" connections without a password, use the env password
     const password = params.password || process.env.POSTGRES_PASSWORD || "";
+
+    // The Neon proxy (Public mode via Funnel, or the proxy port directly in
+    // Tailscale/Auto mode) needs the endpoint ID to route to a compute, and
+    // the Funnel edge requires direct TLS (it drops the classic SSLRequest).
+    const proxyPort = parseInt(process.env.NEON_PROXY_PORT || "65432", 10);
+    const viaProxy = networkMode === "public" || resolvedHost.port === proxyPort;
 
     return testPgConnection({
       host: resolvedHost.host,
@@ -172,6 +195,9 @@ export class ConnectionService {
       user: roleName,
       password,
       sslMode: resolvedSsl,
+      options:
+        viaProxy && endpointId ? `endpoint=${endpointId}` : undefined,
+      sslnegotiation: networkMode === "public" ? "direct" : undefined,
     });
   }
 

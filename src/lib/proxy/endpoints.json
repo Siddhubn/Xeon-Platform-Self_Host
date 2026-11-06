@@ -7,5 +7,23 @@
     "compute_id": "ep-main",
     "tenant_id": "0908a23e5151e6d9c6cf43fbbb819aa5",
     "timeline_id": "5ead2b92252b3fab15b7e93bda5a5d50"
+  },
+  "ep-0240dab0": {
+    "host": "127.0.0.1",
+    "port": 55634,
+    "project_id": "a05dd258f943aca285eaccbcbf0ecfbf",
+    "branch_id": "main",
+    "compute_id": "ep-0240dab0",
+    "tenant_id": "0240dab0263ed68fee9030b816a97da4",
+    "timeline_id": "475f3158d444a0fab44ee8a7b3d99c5f"
+  },
+  "ep-99ab67a9": {
+    "host": "127.0.0.1",
+    "port": 55433,
+    "project_id": "9ca937837d8fa542f79b94e9ce928a22",
+    "branch_id": "main",
+    "compute_id": "ep-99ab67a9",
+    "tenant_id": "99ab67a94ff8e72b51e809e426312384",
+    "timeline_id": "a000393206bd41c546d5f53b78e7ade5"
   }
 }

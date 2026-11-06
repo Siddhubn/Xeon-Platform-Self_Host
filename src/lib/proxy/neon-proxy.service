@@ -14,7 +14,7 @@ EnvironmentFile=/opt/neon/proxy-config/proxy.env
 
 ExecStartPre=/opt/neon/proxy-config/bin/verify-proxy-prereqs.sh
 ExecStart=/opt/neon/target/release/proxy \
-    --proxy 0.0.0.0:5432 \
+    --proxy 0.0.0.0:65432 \
     --auth-backend control-plane \
     --auth-endpoint http://127.0.0.1:5433/ \
     --control-plane-token "" \

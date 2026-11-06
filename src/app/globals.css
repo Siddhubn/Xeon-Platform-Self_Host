@@ -439,8 +439,7 @@ select option {
   background-color: #1f2937 !important;
 }
 
-[data-theme="dark"] select option:checked,
-[data-theme="dark"] select option:selected {
+[data-theme="dark"] select option:checked {
   background-color: rgba(59, 130, 246, 0.25) !important;
   color: #f9fafb !important;
 }

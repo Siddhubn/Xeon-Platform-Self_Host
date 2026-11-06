@@ -34,6 +34,8 @@ yarn-error.log*
 .env*
 *.env.*
 proxy.env
+.env.local
+.env
 
 # vercel
 .vercel

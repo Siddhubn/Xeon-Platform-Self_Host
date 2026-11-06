@@ -526,6 +526,50 @@ class SelfHostedProjects implements ProjectService {
       `[Projects.create] Project "${projectName}" created with tenant ${sdkTenantId}, branch "${defaultBranchName}" → timeline ${sdkTimelineId}`
     );
 
+    // Default compute for the main branch. The dashboard reports "degraded"
+    // for projects with no compute, so every project gets a logical endpoint
+    // here. The metadata row is always created; the neon_local endpoint itself
+    // is created only when the CLI is available (non-fatal otherwise, same
+    // policy as the branch mapping creation above).
+    const endpointId = `ep-${sdkTenantId.slice(0, 8)}`;
+    const existingComputes = this.db
+      .select()
+      .from(schema.computes)
+      .where(isNull(schema.computes.deletedAt))
+      .all();
+    const usedPorts = new Set(existingComputes.map((c) => c.port || 0));
+    let computePort = parseInt(process.env.POSTGRES_PORT || "55432", 10);
+    while (usedPorts.has(computePort)) computePort += 1;
+
+    try {
+      await neonLocal.createEndpoint(sdkTenantId, defaultBranchName, endpointId, {
+        pgVersion: input.pgVersion ?? 17,
+        port: computePort,
+      });
+      console.log(
+        `[Projects.create] Created endpoint ${endpointId} on port ${computePort}`
+      );
+    } catch (err) {
+      console.warn(
+        `[Projects.create] Could not create neon_local endpoint (create it on the Neon server with: neon_local endpoint create ${endpointId} --tenant-id ${sdkTenantId} --branch-name ${defaultBranchName} --pg-port ${computePort}):`,
+        err instanceof Error ? err.message : err
+      );
+    }
+
+    this.db
+      .insert(schema.computes)
+      .values({
+        id: endpointId,
+        projectId,
+        branchId: projectId, // the default branch row uses projectId as its id
+        name: endpointId,
+        host: "127.0.0.1",
+        port: computePort,
+        database: "postgres",
+        role: "cloud_admin",
+      })
+      .run();
+
     return {
       id: projectId,
       name: projectName,

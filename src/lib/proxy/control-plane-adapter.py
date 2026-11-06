@@ -41,7 +41,7 @@ from typing import Optional, Dict, Any, List
 PG_HOST = os.environ.get("NEON_CPLANE_PG_HOST", "127.0.0.1")
 PG_PORT = os.environ.get("NEON_CPLANE_PG_PORT", "55432")
 PG_USER = os.environ.get("NEON_CPLANE_PG_USER", "cloud_admin")
-PG_PASSWORD = os.environ.get("NEON_CPLANE_PG_PASSWORD", "helloworld")
+PG_PASSWORD = os.environ.get("NEON_CPLANE_PG_PASSWORD", "")
 PG_DATABASE = os.environ.get("NEON_CPLANE_PG_DATABASE", "postgres")
 
 LISTEN_HOST = os.environ.get("NEON_CPLANE_LISTEN_HOST", "127.0.0.1")
@@ -149,16 +149,21 @@ def resolve_endpoint(endpoint_id: str) -> Optional[Dict[str, Any]]:
     return None
 
 
-def get_scram_secret(role_name: str) -> Optional[str]:
-    """Query the running PostgreSQL for a role's SCRAM-SHA-256 secret."""
+def get_scram_secret(role_name: str, ep: Optional[Dict[str, Any]] = None) -> Optional[str]:
+    """Query the endpoint's OWN compute PostgreSQL for a role's SCRAM-SHA-256 secret.
+
+    Each endpoint is a separate PostgreSQL cluster with its own pg_authid,
+    so the secret must be read from the endpoint's compute — not a global port.
+    Falls back to the configured default only if no endpoint is given.
+    """
     try:
         env = os.environ.copy()
         env["PGPASSWORD"] = PG_PASSWORD
         result = subprocess.run(
             [
                 "psql",
-                "-h", PG_HOST,
-                "-p", PG_PORT,
+                "-h", ep["host"] if ep else PG_HOST,
+                "-p", str(ep["port"]) if ep else PG_PORT,
                 "-U", PG_USER,
                 "-d", PG_DATABASE,
                 "-t", "-A",
@@ -291,7 +296,7 @@ class ControlPlaneHandler(BaseHTTPRequestHandler):
                 "ENDPOINT_NOT_FOUND")
             return
 
-        role_secret = get_scram_secret(role)
+        role_secret = get_scram_secret(role, ep)
 
         response = {
             "role_secret": role_secret,

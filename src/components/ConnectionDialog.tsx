@@ -266,7 +266,21 @@ export default function ConnectionDialog({
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [networkMode, setNetworkMode] = useState<ConnectionNetworkMode>("auto");
-  const [sslMode, setSslMode] = useState<SslMode>("disable");
+  // SSL mode: an explicit user choice, otherwise the sensible default for the
+  // selected network mode. "auto" defers to the server, which resolves TLS
+  // based on where the host actually lands (proxy / Funnel => require).
+  const [sslModeOverride, setSslModeOverride] = useState<SslMode | null>(null);
+  const sslMode: SslMode =
+    sslModeOverride ??
+    (networkMode === "local" || networkMode === "private" ? "disable" : "require");
+  // What is actually sent to the API for this mode
+  const sslParam: SslMode | undefined =
+    sslModeOverride ?? (networkMode === "auto" ? undefined : sslMode);
+
+  // Switching network mode restores that mode's default SSL setting
+  useEffect(() => {
+    setSslModeOverride(null);
+  }, [networkMode]);
 
   const [connectionType, setConnectionType] = useState<"direct" | "pooled">("direct");
   const [activeTab, setActiveTab] = useState<ConnectionTab>("postgresql");
@@ -322,7 +336,7 @@ export default function ConnectionDialog({
       if (selectedDatabase) params.set("database", selectedDatabase);
       if (selectedRole) params.set("role", selectedRole);
       if (password) params.set("password", password);
-      if (sslMode) params.set("sslMode", sslMode);
+      if (sslParam) params.set("sslMode", sslParam);
 
       const res = await fetch(
         `/api/projects/${selectedProject}/branches/${selectedBranch}/connection?${params}`
@@ -378,7 +392,7 @@ export default function ConnectionDialog({
             roleName: selectedRole,
             password,
             networkMode,
-            sslMode,
+            sslMode: sslParam,
           }),
         }
       );
@@ -633,7 +647,7 @@ export default function ConnectionDialog({
                 <Dropdown
                   value={sslMode}
                   options={SSL_MODES}
-                  onChange={setSslMode}
+                  onChange={setSslModeOverride}
                   placeholder="Select SSL mode"
                   icon={Shield}
                 />
@@ -903,11 +917,14 @@ export default function ConnectionDialog({
                       <div className="mt-3 text-[11px] text-[var(--text-secondary)]">
                         Connect from anywhere using the public connection string above.
                         The Neon Proxy handles routing to the correct compute endpoint.
+                        Routed through the Tailscale Funnel — clients must support
+                        direct TLS negotiation (<span className="font-mono">sslnegotiation=direct</span>,
+                        libpq/psql 17+).
                       </div>
                     </div>
                   )}
 
-                  {networkMode === "public" && !process.env?.NEON_PUBLIC_DOMAIN && (
+                  {networkMode === "public" && details !== null && !details.host && (
                     <div className="p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/20 text-[12px] flex items-start gap-2" style={{ color: "var(--text-primary)" }}>
                       <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0 text-yellow-400" />
                       <div>

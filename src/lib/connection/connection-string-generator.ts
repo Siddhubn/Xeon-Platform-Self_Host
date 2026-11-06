@@ -46,15 +46,27 @@ export function generateConnectionStrings(
   const authPart = password ? `${user}:${encodedPassword}@` : `${user}@`;
   const baseUri = `postgresql://${authPart}${host}:${port}/${database}`;
 
-  // For public mode, the Neon proxy requires the endpoint ID as an option.
-  // This tells the proxy which compute to route the connection to.
-  const endpointOption = input.networkMode === "public" && input.endpointId
+  // The Neon proxy requires the endpoint ID as an option — this tells it
+  // which compute to route the connection to. That applies to Public mode
+  // (Funnel -> proxy) and to any mode that lands on the proxy port itself
+  // (e.g. Tailscale mode -> <server>:65432).
+  const proxyPort = parseInt(process.env.NEON_PROXY_PORT || "65432", 10);
+  const viaProxy = input.networkMode === "public" || port === proxyPort;
+  const endpointOption = viaProxy && input.endpointId
     ? `options=endpoint%3D${encodeURIComponent(input.endpointId)}`
     : null;
 
+  // Public mode goes through the Tailscale Funnel, whose edge only forwards
+  // connections that begin with a TLS ClientHello — the classic Postgres
+  // SSLRequest preface is dropped. `sslnegotiation=direct` makes libpq/psql
+  // (17+) start TLS immediately instead of sending SSLRequest first.
+  const negotiation = input.networkMode === "public"
+    ? "&sslnegotiation=direct"
+    : "";
+
   const baseUriSsl = endpointOption
-    ? `${baseUri}?sslmode=${sslMode}&${endpointOption}`
-    : `${baseUri}?sslmode=${sslMode}`;
+    ? `${baseUri}?sslmode=${sslMode}${negotiation}&${endpointOption}`
+    : `${baseUri}?sslmode=${sslMode}${negotiation}`;
 
   // Pooler details
   const poolerHost = input.poolerHost || host;
@@ -76,7 +88,7 @@ export function generateConnectionStrings(
     // 19. Public/Remote connection string (Neon proxy)
     publicConnectionString:
       input.networkMode === "public" && endpointOption
-        ? `${baseUri}?sslmode=${sslMode}&${endpointOption}`
+        ? `${baseUri}?sslmode=${sslMode}${negotiation}&${endpointOption}`
         : null,
 
     // 4. Individual connection parameters
@@ -95,7 +107,13 @@ export function generateConnectionStrings(
     // 6. libpq key-value format
     libpqKeyValue: `host=${host} port=${port} dbname=${database} user=${user}${
       password ? ` password=${password}` : ""
-    } sslmode=${sslMode}`,
+    } sslmode=${sslMode}${
+      input.networkMode === "public" ? " sslnegotiation=direct" : ""
+    }${
+      // Keyword/value format is NOT URL-decoded by libpq, so the endpoint
+      // option is passed literally (not %3D-encoded).
+      viaProxy && input.endpointId ? ` options=endpoint=${input.endpointId}` : ""
+    }`,
 
     // 7. JDBC connection string
     jdbcString: `jdbc:postgresql://${host}:${port}/${database}?user=${user}${

@@ -1,0 +1,17 @@
+[Unit]
+Description=Neon public access tunnel (Tailscale Funnel tcp:443 -> Neon Proxy 127.0.0.1:65432)
+Documentation=https://tailscale.com/kb/1247/funnel-serve-use-cases
+After=network-online.target tailscaled.service neon-proxy.service
+Wants=network-online.target
+Requires=tailscaled.service
+
+[Service]
+Type=simple
+ExecStart=/opt/neon/proxy-config/bin/ensure-funnel.sh
+Restart=always
+RestartSec=10
+# Ensure a crash-loop is visible but never blocks boot
+TimeoutStartSec=0
+
+[Install]
+WantedBy=multi-user.target
